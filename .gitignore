@@ -2,6 +2,7 @@ uploaded_images
 .idea
 models/COVIDNet-CXR3-B
 models/COVIDNet-CXR3-B_old
+.env
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
