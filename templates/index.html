@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+     <link rel="stylesheet" href="https://unpkg.com/buefy@0.8.20/dist/buefy.min.css">
+     <script src="https://unpkg.com/vue"></script>
+    <!-- Full bundle -->
+    <script src="https://unpkg.com/buefy/dist/buefy.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@0.19.2/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.materialdesignicons.com/5.3.45/css/materialdesignicons.min.css">
+
+
+        <title> Covid-19 prediction from chest x-ray images </title>
+
+        <style type="text/css">
+            a{
+                color: #525252;
+                text-decoration: underline;
+            }
+            .hero.is-primary, .button.is-primary, .button.is-primary.is-hovered, .button.is-primary:hover{
+                background-color: #525252;
+            }
+
+            .file{
+                justify-content: center !important
+            }
+
+            .mt5{
+                margin-top: 5rem;
+            }
+
+            p.prediction{
+                margin-top: 5rem;
+            }
+
+            p.prediction span{
+                background: #525252;
+                color: white;
+                padding: 5px;
+                border-radius: 5px;
+                font-size: 1.3rem;
+                box-shadow: 0 0 2px 0px #000;
+            }
+
+            footer{
+                position: fixed;
+                bottom: 0;
+                width: 100%;
+            }
+        </style>
+</head>
+
+<body>
+
+<section class="hero is-primary">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        Covid19 prediction from X-Ray images
+      </h1>
+      <h2 class="subtitle">
+        This is a demonstration of Deep Neural Networks in identifying Covid19 from chest X-Ray images.
+        <br>
+        This is a work in progress. 
+        <br>
+        DO NOT use it to diagnose any Covid19 related situation.
+      </h2>
+    </div>
+  </div>
+</section>
+
+
+<section class="section mt5" id="app">
+    <div class="container">
+        <b-loading :is-full-page="true" :active.sync="isLoading" :can-cancel="false"></b-loading>
+
+        
+        <template>
+            <section>
+                <div class="">
+                    <b-field class="file has-text-centered">
+                        <b-upload v-model="file" @input="handleFileUpload">
+                            <a class="button is-primary">
+                                <b-icon icon="upload"></b-icon>
+                                <span>Click to upload an X-Ray image</span>
+                            </a>
+                        </b-upload>
+                        <span class="file-name" v-if="file">
+                            {%raw%}{{ file.name }}{%endraw%}
+                        </span>
+                    </b-field>
+
+                    <div v-if="prediction.length > 0">
+                        <p class="prediction is-size-4 has-text-centered" >
+                        Prediction: <span>{%raw%}{{ prediction }}{%endraw%}</span>
+                        </p>
+                        <p class="has-text-centered mt5 is-size-5">
+                            <strong>Inferred probabilities of all 3 classes:</strong> <br><br>
+                           {%raw%}{{ inference }}{%endraw%}
+                        </p>
+                    </div>
+
+                </div>
+
+            </section>
+        </template>
+
+
+    </div>
+</section>
+
+<section class="section">
+    <div class="container">
+        
+    </div>
+</section>
+
+
+
+<footer class="footer">
+  <div class="content has-text-centered">
+    <p>
+      <strong>Covid19 prediction from X-Ray images</strong> by <a href="https://scifilab.io">Science Fiction Lab</a>.
+        <br>The source code is licensed
+      <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
+      is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC BY NC SA 4.0</a>.
+    </p>
+  </div>
+</footer>
+
+
+<script>
+const app = new Vue({
+        data: {
+            file: null,
+            prediction: '',
+            inference: '',
+            isLoading: false,
+        },
+
+      methods: {
+            deleteDropFile(index) {
+              this.dropFiles.splice(index, 1);
+            },
+
+            handleFileUpload(file){
+                const self = this;
+                let formData = new FormData();
+                formData.append("x_ray_image", this.$data.file);
+                self.$data.isLoading = true;
+                self.$data.prediction = '';
+                axios.post('/upload-image', formData, {
+                    headers: {
+                      'Content-Type': 'multipart/form-data'
+                    }
+                }).then(function(response){
+                    console.log(response.data)
+                    self.$data.prediction = response.data.prediction
+                    self.$data.inference = response.data.all
+                    self.$data.isLoading = false;
+                }).catch(function(error){
+                    console.log(error)
+                    self.$data.isLoading = false;
+                })
+            }
+    }
+});
+
+
+app.$mount("#app");
+</script>
+
+</body>
+</html>
+
+
+
